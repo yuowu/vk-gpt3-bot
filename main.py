@@ -1,20 +1,37 @@
 import os
+
 from vkbottle.bot import Bot, Message
 import openai
 
-openai.api_key = os.environ.get('OPENAI_API_KEY')
-bot = Bot(os.environ.get('VK_API_TOKEN'))
+
+openai.api_key = os.getenv('openai_api_key')
+bot = os.getenv('vkbottle_token')
+
+
+messages = []        
+queue = []
 
 
 @bot.on.message(text="!бот <msg>")
 async def upload_handler(message: Message, msg):
-    model_engine = "text-davinci-003"
-    prompt = msg
-    completion = openai.Completion.create(engine=model_engine, prompt=prompt, max_tokens=400, n=1, stop=None,
-                                          temperature=0.5)
-    text = completion.choices[0].text
-    await message.reply(text)
+    try:
+        if len(queue) >= 3:
+            await message.reply("падажди")
+        else:
+            messages.append({"role": "user", "content": msg})
+            queue.append(msg)
+            chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages = messages)
+            reply = chat.choices[0].message.content
+            await message.reply(f"{reply}")
+            queue.remove(msg)
+            messages.append({"role":"assistant", "content": reply})
+    except openai.error.InvalidRequestError as e:
+        await message.reply(f"Произошла ошибка: {e}")
+        queue.remove(msg)
+    except openai.error.OpenAIError as e:
+        queue.remove(msg)
+        await message.reply(f"Ошибка: {e.error} HTTP: ({e.http_status})")
 
 
 if __name__ == "__main__":
-    bot.run_forever()
+  bot.run_forever()
