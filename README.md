@@ -5,7 +5,7 @@
 ## Установка
 1. Получаем API токен [OpenAI](https://openai.com/api/)
 2. Получаем API токен бота вашего сообщества ВКонтакте
-3. `git clone https://github.com/maedakatoo/vk-gpt3-bot`
+3. `git clone https://github.com/yumify/vk-gpt3-bot`
 ## Использование
 
 1. Добавляем сообщество в беседу
